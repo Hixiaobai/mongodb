@@ -88,7 +88,7 @@ class MongApi{
 		// 获取参数
 		
 		$page = (int)trim(@$_GET['page']) ?? 1;
-		
+		$limit = (int)trim(@$_GET['limit']) ?? 10;
 		// 验证参数
 		if(($_id = $this->objID()) != false){
 
@@ -98,7 +98,7 @@ class MongApi{
 			$res = $this->mongo->query();
 		}
 		// 返回数据
-		echo $this->dataSplicing($res,$page); 
+		echo $this->dataSplicing($res,$page,$limit); 
 	}
 
 	/**
@@ -108,20 +108,21 @@ class MongApi{
 	{	
 		$title = trim(@$_GET['title']);
 		$page = (int)trim(@$_GET['page']) ?? 1;
+		$limit = (int)trim(@$_GET['limit']) ?? 10;
 		if(empty($title)){
 			die;
 		}
 		$where = ['title' => ['$regex' =>$title.'+']];
 		$res = $this->mongo->query($where);
 
-		echo $this->dataSplicing($res,$page); 
+		echo $this->dataSplicing($res,$page,$limit); 
 	}
 
 	/**
 	 * 数据拼接
 	 * @return json
 	 */
-	private function dataSplicing($res, $page)
+	private function dataSplicing($res, $page, $limit)
 	{
 		// 获取总条数
 		$count = count((array)$res);
@@ -135,7 +136,7 @@ class MongApi{
 				$data[$key]['time'] = date('Y-m-d H:i:s', $value->time);
 			}
 
-			$data = $this->pages($data, $page);
+			$data = $this->pages($data, $page, $limit);
 			$data = ['code'=>0, 'mag'=>'', 'count'=>$count ,'data'=>$data];
 			return json_encode($data);
 		}
